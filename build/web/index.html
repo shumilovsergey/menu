@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>menu</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="menu" />
+  <link rel="stylesheet" href="/shell.css" />
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+<div id="bg"></div>
+
+{{if .Error}}
+<div class="error-banner">{{.Error}}</div>
+{{end}}
+
+{{if .User}}
+
+<nav class="navbar">
+  <div class="nav-tabs">
+    <button class="tab active" data-tab="apps">apps</button>
+    <button class="tab" data-tab="info">info</button>
+  </div>
+  <div class="profile-area">
+    <button class="profile-btn" id="profileBtn"
+            data-name="{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}">
+      <span class="profile-initial">?</span>
+    </button>
+    <div class="profile-popover" id="profilePopover">
+      <div class="pi-info">
+        <span class="pi-label">{{.User.Method}}</span>
+        <span class="pi-name">{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}</span>
+        {{if .User.Name}}<span class="pi-sub">{{.User.AuthID}}</span>{{end}}
+      </div>
+      <div class="pi-meta">
+        <span>member since {{.User.CreatedAt.Format "2006-01-02"}}</span>
+        <span>last login {{.User.LastLogin.Format "2006-01-02 15:04 UTC"}}</span>
+      </div>
+      <a class="pi-action pi-readme" href="https://github.com/shumilovsergey/menu#" target="_blank" rel="noopener">readme</a>
+      <a class="pi-action pi-logout" href="/logout">log out</a>
+    </div>
+  </div>
+</nav>
+
+<main class="app-content">
+  <div class="tab-panel active" id="panel-apps">
+    <div class="app-grid">
+      <a class="app-btn" href="/open-wgetbash">wgetbash</a>
+      <a class="app-btn" href="/open-blur">blur</a>
+      <a class="app-btn" href="/open-food-scaner">food scaner</a>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-info">
+    <div class="info-content">
+      <p>menu — центральная точка входа в экосистему sh-development.</p>
+      <p>Все приложения используют единую авторизацию. Войдите один раз — и переходите между сервисами без повторного входа.</p>
+      <p>Домен: <a href="https://sh-development.ru" target="_blank" rel="noopener">sh-development.ru</a></p>
+    </div>
+  </div>
+</main>
+
+{{else}}
+
+<div class="login-screen">
+
+  <div class="login-card-wrap">
+    <div class="login-card">
+      <div class="login-logo">menu</div>
+      <a class="login-domain" href="https://sh-development.ru" target="_blank" rel="noopener">sh-development.ru</a>
+      <a class="login-btn" href="/login">войти</a>
+    </div>
+  </div>
+
+  <div class="app-about">
+    <p>Центральное меню экосистемы sh-development. Единая авторизация — открывайте любое приложение без повторного входа.</p>
+  </div>
+
+  <div class="login-divider">
+    <span class="login-divider-dot"></span>
+  </div>
+
+</div>
+
+{{end}}
+
+<script src="/shell.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

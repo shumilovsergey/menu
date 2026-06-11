@@ -1,0 +1,8 @@
+services:
+  release:
+    build:
+      context: .
+      target: builder
+    volumes:
+      - ./bin:/out
+    entrypoint: ["cp", "/menu", "/out/menu"]
