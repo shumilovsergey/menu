@@ -47,10 +47,19 @@
 
 <main class="app-content">
   <div class="tab-panel active" id="panel-apps">
-    <div class="app-grid">
-      <a class="app-btn" href="/open-wgetbash">wgetbash</a>
-      <a class="app-btn" href="/open-blur">blur</a>
-      <a class="app-btn" href="/open-food-scaner">food scaner</a>
+    <div class="apps-wrap">
+      <div class="app-grid">
+        {{range .Apps}}
+        <div class="app-card checking" data-slug="{{.Slug}}" data-url="{{.URL}}">
+          <div class="app-icon" data-seed="{{.Icon}}">{{.Icon}}</div>
+          <i class="dot" aria-hidden="true"></i>
+          <span class="app-name">{{.Name}}</span>
+          <button class="app-info-btn" data-name="{{.Name}}" data-desc="{{.Desc}}" aria-label="инфо о {{.Name}}">i</button>
+          <a class="app-open" href="/open/{{.Slug}}" aria-label="открыть {{.Name}}"></a>
+        </div>
+        {{end}}
+      </div>
+      <button class="app-refresh" id="appRefresh" aria-label="обновить статус" title="обновить статус">↻</button>
     </div>
   </div>
   <div class="tab-panel" id="panel-info">
@@ -85,6 +94,22 @@
 </div>
 
 {{end}}
+
+<div class="app-modal-backdrop" id="appModal">
+  <div class="app-modal" role="dialog" aria-modal="true">
+    <div class="app-modal-name" id="appModalName"></div>
+    <div class="app-modal-desc" id="appModalDesc"></div>
+    <button class="app-modal-close" id="appModalClose">закрыть</button>
+  </div>
+</div>
+
+<div class="app-modal-backdrop" id="statusModal">
+  <div class="app-modal status-modal" role="dialog" aria-modal="true">
+    <div class="app-modal-name" id="statusModalTitle"></div>
+    <div class="app-modal-desc" id="statusModalText"></div>
+    <button class="app-modal-close" id="statusModalClose">понятно</button>
+  </div>
+</div>
 
 <script src="/shell.js"></script>
 <script src="/app.js"></script>

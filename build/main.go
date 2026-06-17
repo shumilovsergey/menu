@@ -2,12 +2,14 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -30,6 +32,62 @@ var (
 type pageData struct {
 	User  *User
 	Error string
+	Apps  []appDef
+}
+
+// appDef is the single source of truth for an app in the grid.
+// The grid (template), the status endpoint, and the open handler all derive from it.
+type appDef struct {
+	Slug string // url segment + status key, e.g. "blur"
+	Name string // display name shown on the card
+	URL  string // target base URL, e.g. "https://blur.sh-development.ru"
+	Icon string // temp placeholder seed (first letter) — swap for real assets later
+	Desc string // info-modal text
+}
+
+var apps = []appDef{
+	{
+		Slug: "wgetbash", Name: "wgetbash", URL: "https://wgetbash.sh-development.ru", Icon: "w",
+		Desc: "Запуск bash-скриптов одной командой через wget.",
+	},
+	{
+		Slug: "wgetbash", Name: "loger", URL: "https://wgetbash.sh-development.ru/?view=loger", Icon: "l",
+		Desc: "Помощник для разбора логов. Чтобы в разгар инцидента не вспоминать команды, флаги и синтаксис.",
+	},
+	{
+		Slug: "blur", Name: "blur", URL: "https://blur.sh-development.ru", Icon: "b",
+		Desc: "Размытие лиц и чувствительных данных на изображениях.",
+	},
+	{
+		Slug: "food-scaner", Name: "food scaner", URL: "https://food-scaner.sh-development.ru", Icon: "f",
+		Desc: "Сканирование состава продуктов по фото этикетки.",
+	},
+}
+
+// appBySlug returns the app with the given slug, or nil.
+func appBySlug(slug string) *appDef {
+	for i := range apps {
+		if apps[i].Slug == slug {
+			return &apps[i]
+		}
+	}
+	return nil
+}
+
+// statusClient is used for short-timeout server-side reachability probes.
+var statusClient = &http.Client{Timeout: 4 * time.Second}
+
+// reachable reports whether the server can reach url (any HTTP response counts).
+func reachable(url string) bool {
+	resp, err := statusClient.Head(url)
+	if err != nil {
+		resp, err = statusClient.Get(url)
+		if err != nil {
+			return false
+		}
+	}
+	resp.Body.Close()
+	return true
 }
 
 func initTemplate() {
@@ -76,52 +134,62 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	if uid := sessionUserID(r); uid != 0 {
 		user, _ = getUserByID(uid)
 	}
-	tmpl.Execute(w, pageData{User: user}) //nolint:errcheck
+	tmpl.Execute(w, pageData{User: user, Apps: apps}) //nolint:errcheck
 }
 
-func handleOpenWgetbash(w http.ResponseWriter, r *http.Request) {
+// handleOpen issues a cross-app delegate redirect for /open/{slug}.
+// The server re-checks reachability first, so a green status on the client is
+// backed by the server half of the check at redirect time too.
+func handleOpen(w http.ResponseWriter, r *http.Request) {
 	uid := sessionUserID(r)
 	if uid == 0 {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
+	app := appBySlug(r.PathValue("slug"))
+	if app == nil {
+		http.NotFound(w, r)
+		return
+	}
+	if !reachable(app.URL) {
+		log.Printf("open-%s uid=%d unreachable", app.Slug, uid)
+		http.Error(w, "app unreachable", http.StatusBadGateway)
+		return
+	}
 	code, err := delegateCode(uid)
 	if err != nil {
-		log.Printf("open-wgetbash uid=%d error=%v", uid, err)
+		log.Printf("open-%s uid=%d error=%v", app.Slug, uid, err)
 		http.Error(w, "could not open app", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "https://wgetbash.sh-development.ru/?code="+code, http.StatusFound)
+	log.Printf("open-%s uid=%d", app.Slug, uid)
+	http.Redirect(w, r, app.URL+"/?code="+code, http.StatusFound)
 }
 
-func handleOpenBlur(w http.ResponseWriter, r *http.Request) {
+// handleStatus returns server-side reachability of every app as {slug: bool}.
+func handleStatus(w http.ResponseWriter, r *http.Request) {
 	uid := sessionUserID(r)
 	if uid == 0 {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	code, err := delegateCode(uid)
-	if err != nil {
-		log.Printf("open-blur uid=%d error=%v", uid, err)
-		http.Error(w, "could not open app", http.StatusInternalServerError)
-		return
+	result := make(map[string]bool, len(apps))
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	for i := range apps {
+		wg.Add(1)
+		go func(a appDef) {
+			defer wg.Done()
+			ok := reachable(a.URL)
+			mu.Lock()
+			result[a.Slug] = ok
+			mu.Unlock()
+		}(apps[i])
 	}
-	http.Redirect(w, r, "https://blur.sh-development.ru/?code="+code, http.StatusFound)
-}
-
-func handleOpenFoodScaner(w http.ResponseWriter, r *http.Request) {
-	uid := sessionUserID(r)
-	if uid == 0 {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	code, err := delegateCode(uid)
-	if err != nil {
-		log.Printf("open-food-scaner uid=%d error=%v", uid, err)
-		http.Error(w, "could not open app", http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "https://food-scaner.sh-development.ru/?code="+code, http.StatusFound)
+	wg.Wait()
+	log.Printf("status uid=%d result=%v", uid, result)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result) //nolint:errcheck
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -156,10 +224,10 @@ func main() {
 	mux.HandleFunc("GET /", handleIndex)
 	mux.HandleFunc("GET /login", handleLogin)
 	mux.HandleFunc("GET /logout", handleLogout)
-	mux.HandleFunc("GET /open-wgetbash", handleOpenWgetbash)
-	mux.HandleFunc("GET /open-blur", handleOpenBlur)
-	mux.HandleFunc("GET /open-food-scaner", handleOpenFoodScaner)
+	mux.HandleFunc("GET /open/{slug}", handleOpen)
+	mux.HandleFunc("GET /status", handleStatus)
 	mux.Handle("GET /favicon.svg", fileServer)
+	mux.Handle("GET /background.webp", fileServer)
 	mux.Handle("GET /shell.css", fileServer)
 	mux.Handle("GET /shell.js", fileServer)
 	mux.Handle("GET /app.css", fileServer)
