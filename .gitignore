@@ -3,3 +3,4 @@ task.md
 CLAUDE.md
 *.db
 *.DS_Store
+.claude/
