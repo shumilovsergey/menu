@@ -112,6 +112,7 @@ body { background: transparent; }
   flex-shrink: 0;
   width: 46px;
   height: 46px;
+  padding: 8px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -122,6 +123,20 @@ body { background: transparent; }
   font-size: 20px;
   font-weight: 600;
   text-transform: uppercase;
+  overflow: hidden;
+}
+
+/* image tiles fill edge-to-edge — no inner glass frame, just the rounded clip */
+.app-icon:has(img) {
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.app-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ── status dot + name ───────────────────────────────────────────────── */
@@ -218,7 +233,8 @@ body { background: transparent; }
   justify-content: center;
   padding: 24px;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .app-modal-backdrop.open { display: flex; }
@@ -226,15 +242,44 @@ body { background: transparent; }
 .app-modal {
   width: 100%;
   max-width: 360px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.68);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
-  padding: 20px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+}
+
+.app-modal-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  backdrop-filter: blur(28px) saturate(1.6);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+}
+
+.app-modal-features li {
+  position: relative;
+  padding-left: 20px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.app-modal-features li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
 }
 
 .app-modal-name {
@@ -275,24 +320,90 @@ body { background: transparent; }
 
 /* ── INFO PAGE ───────────────────────────────────────────────────────── */
 
-.info-content {
-  padding: 24px 16px;
-  max-width: 480px;
+.info-card {
+  width: 100%;
+  max-width: 560px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  color: var(--text-dim);
-  line-height: 1.6;
+  gap: 22px;
+  padding: 30px 26px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.9;
 }
 
-.info-content a {
-  color: var(--accent);
+.info-card strong { color: rgba(255, 255, 255, 0.92); font-weight: 600; }
+
+.info-card .info-foot { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+
+/* inline links inside paragraphs */
+.info-card p a {
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.info-content a:hover {
-  color: var(--neon);
+.info-card p a:hover { border-bottom-color: rgba(255, 255, 255, 0.7); }
+
+/* contact links as glassy buttons */
+.info-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
+
+.info-link {
+  display: inline-block;
+  padding: 15px 26px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.info-link:hover {
+  border-color: var(--border-active);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* ── toast (copied confirmation) ─────────────────────────────────────── */
+
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 400;
+  max-width: calc(100vw - 32px);
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.app-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── PROFILE POPOVER: glassy action buttons ─────────────────────────── */
 

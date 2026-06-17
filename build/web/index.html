@@ -35,10 +35,6 @@
         <span class="pi-name">{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}</span>
         {{if .User.Name}}<span class="pi-sub">{{.User.AuthID}}</span>{{end}}
       </div>
-      <div class="pi-meta">
-        <span>member since {{.User.CreatedAt.Format "2006-01-02"}}</span>
-        <span>last login {{.User.LastLogin.Format "2006-01-02 15:04 UTC"}}</span>
-      </div>
       <a class="pi-action pi-readme" href="https://github.com/shumilovsergey/menu#" target="_blank" rel="noopener">readme</a>
       <a class="pi-action pi-logout" href="/logout">log out</a>
     </div>
@@ -51,10 +47,10 @@
       <div class="app-grid">
         {{range .Apps}}
         <div class="app-card checking" data-slug="{{.Slug}}" data-url="{{.URL}}">
-          <div class="app-icon" data-seed="{{.Icon}}">{{.Icon}}</div>
+          <div class="app-icon">{{if .Icon}}<img src="/app_icons/{{.Icon}}" alt="">{{else}}{{slice .Name 0 1}}{{end}}</div>
           <i class="dot" aria-hidden="true"></i>
           <span class="app-name">{{.Name}}</span>
-          <button class="app-info-btn" data-name="{{.Name}}" data-desc="{{.Desc}}" aria-label="инфо о {{.Name}}">i</button>
+          <button class="app-info-btn" data-name="{{.Name}}" data-desc="{{.Desc}}" data-features="{{join .Features "|"}}" aria-label="инфо о {{.Name}}">i</button>
           <a class="app-open" href="/open/{{.Slug}}" aria-label="открыть {{.Name}}"></a>
         </div>
         {{end}}
@@ -63,10 +59,14 @@
     </div>
   </div>
   <div class="tab-panel" id="panel-info">
-    <div class="info-content">
-      <p>menu — центральная точка входа в экосистему sh-development.</p>
-      <p>Все приложения используют единую авторизацию. Войдите один раз — и переходите между сервисами без повторного входа.</p>
-      <p>Домен: <a href="https://sh-development.ru" target="_blank" rel="noopener">sh-development.ru</a></p>
+    <div class="info-card">
+      <p>Привет! Меня зовут <strong>Сергей Шумилов</strong>, и это моё видение экосистемы веб-приложений.</p>
+      <p>Отдельного приложения для поддержки пока нет. Если хотите дать совет или сообщить об ошибке — напишите мне:</p>
+      <div class="info-links">
+        <button class="info-link" id="copyEmail" data-email="wumilovsergey@gmail.com">wumilovsergey@gmail.com</button>
+        <a class="info-link" href="https://t.me/sergey_showmelove" target="_blank" rel="noopener">t.me/sergey_showmelove</a>
+      </div>
+      <p class="info-foot">Больше обо мне — <a href="https://sh-development.ru" target="_blank" rel="noopener">sh-development.ru</a></p>
     </div>
   </div>
 </main>
@@ -99,6 +99,7 @@
   <div class="app-modal" role="dialog" aria-modal="true">
     <div class="app-modal-name" id="appModalName"></div>
     <div class="app-modal-desc" id="appModalDesc"></div>
+    <ul class="app-modal-features" id="appModalFeatures"></ul>
     <button class="app-modal-close" id="appModalClose">закрыть</button>
   </div>
 </div>
@@ -110,6 +111,8 @@
     <button class="app-modal-close" id="statusModalClose">понятно</button>
   </div>
 </div>
+
+<div class="app-toast" id="toast"></div>
 
 <script src="/shell.js"></script>
 <script src="/app.js"></script>

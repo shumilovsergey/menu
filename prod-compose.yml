@@ -5,4 +5,19 @@ services:
       target: builder
     volumes:
       - ./bin:/out
-    entrypoint: ["cp", "/menu", "/out/menu"]
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cp /menu /out/menu
+        printf "\033[1;32m\n"
+        printf "  ╔══════════════════════════════════╗\n"
+        printf "  ║         MENU PROD BUILD          ║\n"
+        printf "  ║  Built: %-25s║\n" "$(/out/menu --version | sed 's/menu built: //')"
+        printf "  ╚══════════════════════════════════╝\n"
+        printf "\033[0m\n"
+
+
+
+
+# docker compose -f prod-compose.yml build --no-cache && docker compose -f prod-compose.yml up

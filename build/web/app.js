@@ -149,9 +149,20 @@ document.querySelectorAll('.app-open').forEach(link => {
 
 const modal = document.getElementById('appModal');
 
-function openModal(name, desc) {
-  document.getElementById('appModalName').textContent = name;
-  document.getElementById('appModalDesc').textContent = desc;
+function openModal(btn) {
+  document.getElementById('appModalName').textContent = btn.dataset.name;
+  document.getElementById('appModalDesc').textContent = btn.dataset.desc;
+
+  const ul = document.getElementById('appModalFeatures');
+  ul.innerHTML = '';
+  const feats = (btn.dataset.features || '').split('|').map(s => s.trim()).filter(Boolean);
+  feats.forEach(f => {
+    const li = document.createElement('li');
+    li.textContent = f;
+    ul.appendChild(li);
+  });
+  ul.style.display = feats.length ? '' : 'none';
+
   modal.classList.add('open');
 }
 function closeModal() {
@@ -159,7 +170,7 @@ function closeModal() {
 }
 
 document.querySelectorAll('.app-info-btn').forEach(btn => {
-  btn.addEventListener('click', () => openModal(btn.dataset.name, btn.dataset.desc));
+  btn.addEventListener('click', () => openModal(btn));
 });
 
 if (modal) {
@@ -172,6 +183,46 @@ if (modal) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeStatusModal(); }
 });
+
+// ── Copy email to clipboard (info tab) ───────────────────────────────────────
+
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg) {
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+
+async function copyText(text) {
+  try {
+    if (navigator.clipboard) { await navigator.clipboard.writeText(text); return true; }
+  } catch { /* fall through to legacy path */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+const copyEmailBtn = document.getElementById('copyEmail');
+if (copyEmailBtn) {
+  copyEmailBtn.addEventListener('click', async () => {
+    const email = copyEmailBtn.dataset.email;
+    const ok = await copyText(email);
+    showToast(ok ? 'Email скопирован в буфер обмена' : email);
+  });
+}
 
 // kick off the first check
 checkStatus();
