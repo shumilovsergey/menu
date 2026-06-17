@@ -80,6 +80,15 @@ var apps = []appDef{
 	},
 }
 
+// cacheStatic wraps a handler with a long-lived cache header. Use for media that
+// only changes on deploy (background, icons, favicon) so browsers don't re-fetch it.
+func cacheStatic(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=2592000") // 30 days
+		h.ServeHTTP(w, r)
+	})
+}
+
 // appBySlug returns the app with the given slug, or nil.
 func appBySlug(slug string) *appDef {
 	for i := range apps {
@@ -244,9 +253,9 @@ func main() {
 	mux.HandleFunc("GET /logout", handleLogout)
 	mux.HandleFunc("GET /open/{slug}", handleOpen)
 	mux.HandleFunc("GET /status", handleStatus)
-	mux.Handle("GET /favicon.svg", fileServer)
-	mux.Handle("GET /background.webp", fileServer)
-	mux.Handle("GET /app_icons/{file}", fileServer)
+	mux.Handle("GET /favicon.svg", cacheStatic(fileServer))
+	mux.Handle("GET /background.webp", cacheStatic(fileServer))
+	mux.Handle("GET /app_icons/{file}", cacheStatic(fileServer))
 	mux.Handle("GET /shell.css", fileServer)
 	mux.Handle("GET /shell.js", fileServer)
 	mux.Handle("GET /app.css", fileServer)
