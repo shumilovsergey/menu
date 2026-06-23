@@ -19,10 +19,23 @@ func delegateCode(uid int64) (string, error) {
 	if err != nil || user == nil {
 		return "", fmt.Errorf("user not found")
 	}
-	body, _ := json.Marshal(map[string]string{
+	// Forward the user's identity so the target app shows the name/provider
+	// instead of just the id. auth-center is stateless: it echoes back only
+	// what we send here. The DB stores one combined name; it maps to the
+	// `name` field for Google and to `first_name` for telegram/solana.
+	payload := map[string]string{
 		"user_id":   user.AuthID,
 		"app_token": appToken,
-	})
+		"method":    user.Method,
+	}
+	if user.Name != "" {
+		if user.Method == "google" {
+			payload["name"] = user.Name
+		} else {
+			payload["first_name"] = user.Name
+		}
+	}
+	body, _ := json.Marshal(payload)
 	resp, err := httpClient.Post(authInternal+"/delegate", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return "", fmt.Errorf("delegate: %w", err)

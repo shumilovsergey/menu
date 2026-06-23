@@ -178,11 +178,13 @@ func handleOpen(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if !reachable(app.URL) {
-		log.Printf("open-%s uid=%d unreachable", app.Slug, uid)
-		http.Error(w, "app unreachable", http.StatusBadGateway)
-		return
-	}
+	// Pre-redirect reachability check disabled for now — just redirect on click.
+	// Re-enable to block opening apps that are down.
+	// if !reachable(app.URL) {
+	// 	log.Printf("open-%s uid=%d unreachable", app.Slug, uid)
+	// 	http.Error(w, "app unreachable", http.StatusBadGateway)
+	// 	return
+	// }
 	code, err := delegateCode(uid)
 	if err != nil {
 		log.Printf("open-%s uid=%d error=%v", app.Slug, uid, err)
