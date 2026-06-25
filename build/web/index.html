@@ -36,8 +36,10 @@
         <span class="pi-name">{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}</span>
         {{if .User.Name}}<span class="pi-sub">{{.User.AuthID}}</span>{{end}}
       </div>
-      <a class="pi-action pi-readme" href="https://github.com/shumilovsergey/menu#" target="_blank" rel="noopener">readme</a>
-      <a class="pi-action pi-logout" href="/logout">log out</a>
+      <div class="pi-list">
+        <a class="pi-action pi-readme" href="https://github.com/shumilovsergey/menu" target="_blank" rel="noopener">readme</a>
+        <a class="pi-action pi-logout" href="/logout">log out</a>
+      </div>
     </div>
   </div>
 </nav>

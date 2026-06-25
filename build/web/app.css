@@ -23,6 +23,45 @@ body { background: transparent; }
   font-style: italic;
 }
 
+/* ── PROFILE MENU: grouped action list ───────────────────────────────────
+   Flat solid menu — background shares one color with the un-hovered rows, so
+   rows only reveal themselves on hover. Log out keeps a red accent at rest.
+   Overrides shell.css's translucent popover + per-row bordered buttons. */
+
+.profile-popover {
+  background: #1c1c1e;                     /* flat solid: same color the rows show */
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.pi-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;                       /* clip rows to the rounded corners */
+}
+
+.pi-list .pi-action {
+  border: none;
+  border-radius: 0;
+  padding: 11px 14px;
+  font-size: 13px;
+  background: #1c1c1e;                     /* exact menu color when not hovered */
+}
+
+/* divider only BETWEEN rows, never on the first one */
+.pi-list .pi-action + .pi-action { border-top: 1px solid rgba(255, 255, 255, 0.10); }
+
+.pi-list .pi-action:hover { background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.95); }
+
+/* the one intentional color: log out is red — red text + faint red fill at rest */
+.pi-list .pi-logout {
+  color: #e58787;
+  background: rgba(200, 70, 70, 0.08);
+  border-top-color: rgba(200, 70, 70, 0.45);
+}
+.pi-list .pi-logout:hover { color: #ffbfbf; background: rgba(200, 70, 70, 0.18); }
+
 /* ── TAB PANELS ──────────────────────────────────────────────────────── */
 
 .tab-panel { display: none; }
@@ -408,7 +447,6 @@ body { background: transparent; }
 /* ── PROFILE POPOVER: glassy action buttons ─────────────────────────── */
 
 .pi-readme {
-  background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.16) !important;
   color: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(8px);
