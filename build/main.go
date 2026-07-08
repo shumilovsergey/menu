@@ -70,7 +70,7 @@ var apps = []appDef{
 		},
 	},
 	{
-		Slug: "food-scaner", Name: "food scaner", URL: "https://food-scaner.sh-development.ru", Icon: "",
+		Slug: "nom-nom", Name: "nom nom", URL: "https://nom-nom.sh-development.ru", Icon: "nom-nom.svg",
 		Desc: "Это трекер для колорий и веса",
 		Features: []string{
 			"Ежедневная статистика прогресса",
