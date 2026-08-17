@@ -1,6 +1,6 @@
 # Menu
 
-![cover](/build/web/baner.webp)
+![cover](/build/web/menu_qr.png)
 
 Это главное Меню, которое собрало в себе все приложения моей экосистемы.
 

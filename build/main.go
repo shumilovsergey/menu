@@ -52,6 +52,15 @@ type appDef struct {
 
 var apps = []appDef{
 	{
+		Slug: "nom-nom", Name: "nom nom", URL: "https://nom-nom.sh-development.ru", Icon: "nom-nom.svg",
+		Desc: "Это трекер для колорий и веса",
+		Features: []string{
+			"Ежедневная статистика прогресса",
+			"Учет и калорий по блюдам",
+			"AI анализ еды по фото",
+		},
+	},
+	{
 		Slug: "wgetbash", Name: "wgetbash", URL: "https://wgetbash.sh-development.ru", Icon: "wgetbash.svg",
 		Desc: "Хранилище для bash скриптов",
 		Features: []string{
@@ -61,21 +70,21 @@ var apps = []appDef{
 		},
 	},
 	{
+		Slug: "qcode", Name: "qcode", URL: "https://qcode.sh-development.ru", Icon: "qcode.png",
+		Desc: "Редактор для создания красивых qr codes",
+		Features: []string{
+			"Есть интеграция с AI",
+			"Огромное разнообразие параметров qr, которые можно изменить",
+			"Это бесплатно!",
+		},
+	},
+	{
 		Slug: "blur", Name: "blur", URL: "https://blur.sh-development.ru", Icon: "blur.png",
 		Desc: "Плеер для длинных аудио — книг, подкастов и лекций",
 		Features: []string{
 			"Удобно выбирать время воспроизведения клавиатурой",
 			"Плеер запоминает где вы остановились, даже если приложение закрыто",
 			"Можно отключить автовоспроизведение, чтоб плеер сам остановился",
-		},
-	},
-	{
-		Slug: "nom-nom", Name: "nom nom", URL: "https://nom-nom.sh-development.ru", Icon: "nom-nom.svg",
-		Desc: "Это трекер для колорий и веса",
-		Features: []string{
-			"Ежедневная статистика прогресса",
-			"Учет и калорий по блюдам",
-			"AI анализ еды по фото",
 		},
 	},
 }
