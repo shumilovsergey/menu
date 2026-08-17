@@ -70,11 +70,11 @@ var apps = []appDef{
 		},
 	},
 	{
-		Slug: "qcode", Name: "qcode", URL: "https://qcode.sh-development.ru", Icon: "qcode.png",
+		Slug: "qcode", Name: "qcode", URL: "https://qcode.sh-development.ru", Icon: "qcode.svg",
 		Desc: "Редактор для создания красивых qr codes",
 		Features: []string{
 			"Есть интеграция с AI",
-			"Огромное разнообразие параметров qr, которые можно изменить",
+			"Огромное разнообразие параметров, которые можно изменить",
 			"Это бесплатно!",
 		},
 	},
