@@ -1,7 +1,7 @@
 # Menu
 
 <p align="center">
-  <img src="/build/web/menu_qr.webp" width="100">
+  <img src="/build/web/menu_qr.webp" width="200">
 </p>
 
 Это главное Меню, которое собрало в себе все приложения моей экосистемы.
