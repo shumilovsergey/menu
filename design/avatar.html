@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>sh — bot avatar</title>
+<style>
+/* Tokens lifted from build/web/app.css so the avatar and the app stay one
+   family. Nothing from menu's own iconography is used here — just the ground,
+   the glow and the typeface. */
+:root {
+  --bg:     #000000;
+  --accent: #f5f5f7;
+  --line:   #2b2b2e;
+  --sunk:   #0a0a0b;
+  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Inter, Roboto, Arial, sans-serif;
+
+  /* Optical centring, in em so it holds at any font-size (verified at 210px
+     and 250px — both needed the same em value).
+     Y: "Sh" has no descender, so its ink sits high in the line box; centring
+        the box alone left the letters ~19px above centre at 250px.
+     X: in a monospace face 'h' leaves more room on its right than 'S' does on
+        its left, so the ink sits left of the advance box.
+     Measured against a fallback mono — if SF Mono lands differently on your
+     Mac, these two numbers are the only things to touch. */
+  --nudge-y: .0929em;
+  --nudge-x: .026em;
+}
+
+* { box-sizing: border-box; }
+html { background: #17171a; }
+body { margin: 0; font-family: var(--sans); color: #a1a1a6; }
+
+/* ── the artboard ────────────────────────────────────────────────────────
+   Exactly 512×512 at the very top-left, so a 512×512 viewport screenshot is
+   the finished asset with nothing else in frame. */
+.avatar {
+  width: 512px;
+  height: 512px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(58% 42% at 50% -4%,  rgba(255, 255, 255, .17), transparent 70%),
+    radial-gradient(115% 75% at 50% -14%, rgba(255, 255, 255, .10), transparent 66%),
+    var(--bg);
+  overflow: hidden;
+}
+
+.mark {
+  transform: translate(var(--nudge-x), var(--nudge-y));
+  font-family: var(--mono);
+  font-size: 250px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent);
+  user-select: none;
+}
+
+/* ── everything below is for judging it in the browser only ──────────────
+   It sits past the 512px fold, so it never lands in the export. */
+.sheet { padding: 40px; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+.note  { width: 100%; max-width: 560px; font-size: 14px; line-height: 1.6; }
+.note h1 { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: var(--accent); }
+.note code { font-family: var(--mono); color: var(--accent); }
+
+.shot { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.shot span { font-size: 12px; color: #6e6e73; }
+
+/* Telegram and most clients crop an avatar to a circle — check the letters
+   clear the crop, and that they still read at list size. */
+.crop { border-radius: 50%; overflow: hidden; }
+.s256 { width: 256px; height: 256px; }
+.s96  { width: 96px;  height: 96px; }
+.s48  { width: 48px;  height: 48px; }
+.s256 .avatar { transform: scale(.5);   transform-origin: top left; }
+.s96  .avatar { transform: scale(.1875); transform-origin: top left; }
+.s48  .avatar { transform: scale(.09375); transform-origin: top left; }
+</style>
+</head>
+<body>
+
+<!-- EXPORT TARGET: screenshot a 512×512 viewport and you get exactly this -->
+<div class="avatar" id="art"><div class="mark">Sh</div></div>
+
+<div class="sheet">
+  <div class="note">
+    <h1>bot avatar — 512×512</h1>
+    Чёрный фон и свечение сверху — те же, что в приложении; шрифт тот же
+    моноширинный. Символики menu здесь нет.
+    Экспорт: снять вьюпорт <code>512×512</code> — артборд стоит в левом верхнем
+    углу, всё остальное на странице ниже сгиба и в кадр не попадает.
+  </div>
+
+  <div class="shot">
+    <div class="crop s256"><div class="avatar"><div class="mark">Sh</div></div></div>
+    <span>круглый кроп · 256</span>
+  </div>
+  <div class="shot">
+    <div class="crop s96"><div class="avatar"><div class="mark">Sh</div></div></div>
+    <span>96</span>
+  </div>
+  <div class="shot">
+    <div class="crop s48"><div class="avatar"><div class="mark">Sh</div></div></div>
+    <span>48</span>
+  </div>
+</div>
+
+</body>
+</html>
