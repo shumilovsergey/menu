@@ -112,11 +112,20 @@ if (statusModal) {
 // The page status may be stale (e.g. user idle 5 min on a green card). So on a
 // click we re-verify reachability at that exact moment; only a fresh `online`
 // result navigates, otherwise we surface the matching popup.
+//
+// TEMPORARILY OFF. Flip PRE_REDIRECT_CHECK back to true to restore every bit of
+// the gating below — nothing else was removed. While it is false the click
+// handler bails out before preventDefault(), so the browser just follows the
+// card's href whatever the dot says. The server half of the same check is
+// likewise commented out in handleOpen (main.go), and the "not-allowed" cursor
+// for blocked cards is commented out in app.css — re-enable all three together.
+const PRE_REDIRECT_CHECK = false;
 
 let opening = false;
 
 document.querySelectorAll('.app-open').forEach(link => {
   link.addEventListener('click', async e => {
+    if (!PRE_REDIRECT_CHECK) return;   // let the browser follow the link
     e.preventDefault();
     if (opening) return;
 
@@ -150,6 +159,14 @@ document.querySelectorAll('.app-open').forEach(link => {
 const modal = document.getElementById('appModal');
 
 function openModal(btn) {
+  // the icon ties the popup back to the card that opened it
+  const icon = document.getElementById('appModalIcon');
+  if (icon) {
+    const src = btn.dataset.icon || '';
+    if (src) { icon.src = src; icon.hidden = false; }
+    else     { icon.removeAttribute('src'); icon.hidden = true; }
+  }
+
   document.getElementById('appModalName').textContent = btn.dataset.name;
   document.getElementById('appModalDesc').textContent = btn.dataset.desc;
 

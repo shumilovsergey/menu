@@ -36,19 +36,46 @@
         <div class="app-card checking" data-slug="{{.Slug}}" data-url="{{.URL}}">
           <div class="app-icon">{{if .Icon}}<img src="/icons/{{.Icon}}?v={{ver}}" alt="">{{else}}{{slice .Name 0 1}}{{end}}</div>
           <span class="app-name">{{.Name}}</span>
+          <i class="dot" aria-hidden="true"></i>
           <a class="app-open" href="/open/{{.Slug}}" aria-label="открыть {{.Name}}"></a>
+          <button class="app-info-btn" data-name="{{.Name}}" data-desc="{{.Desc}}" data-icon="{{if .Icon}}/icons/{{.Icon}}?v={{ver}}{{end}}" data-features="{{join .Features "|"}}" aria-label="подробнее о {{.Name}}">i</button>
         </div>
         {{end}}
       </div>
+      <button class="app-refresh" id="appRefresh" aria-label="обновить статусы приложений" title="обновить статусы">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
     </div>
   </div>
   <div class="tab-panel" id="panel-info">
     <div class="info-card">
+      <div class="card-head">
+        <img class="card-head-mark" src="/favicon.svg?v={{ver}}" alt="">
+        <h2 class="info-title">о проекте</h2>
+      </div>
       <p>Привет! Меня зовут <strong>Сергей Шумилов</strong>, и это моё видение экосистемы веб-приложений.</p>
       <p>Отдельного приложения для поддержки пока нет. Если хотите дать совет или сообщить об ошибке — напишите мне:</p>
       <div class="info-links">
-        <button class="info-link" id="copyEmail" data-email="wumilovsergey@gmail.com">wumilovsergey@gmail.com</button>
-        <a class="info-link" href="https://t.me/sergey_showmelove" target="_blank" rel="noopener">t.me/sergey_showmelove</a>
+        <button class="info-link" id="copyEmail" data-email="wumilovsergey@gmail.com">
+          <span class="info-link-text">wumilovsergey@gmail.com</span>
+          <svg class="info-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="12" height="12" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+        <a class="info-link" href="https://t.me/sergey_showmelove" target="_blank" rel="noopener">
+          <span class="info-link-text">t.me/sergey_showmelove</span>
+          <svg class="info-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M8 7h9v9"/>
+          </svg>
+        </a>
       </div>
       <p class="info-foot">Больше обо мне — <a href="https://sh-development.ru" target="_blank" rel="noopener">sh-development.ru</a></p>
     </div>
@@ -81,16 +108,26 @@
 
 <div class="app-modal-backdrop" id="appModal">
   <div class="app-modal" role="dialog" aria-modal="true">
-    <div class="app-modal-name" id="appModalName"></div>
+    <button class="app-modal-x" id="appModalClose" aria-label="закрыть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6 18 18M18 6 6 18"/>
+      </svg>
+    </button>
+    <div class="card-head">
+      <img class="card-head-mark" id="appModalIcon" alt="" hidden>
+      <div class="app-modal-name" id="appModalName"></div>
+    </div>
     <div class="app-modal-desc" id="appModalDesc"></div>
     <ul class="app-modal-features" id="appModalFeatures"></ul>
-    <button class="app-modal-close" id="appModalClose">закрыть</button>
   </div>
 </div>
 
 <div class="app-modal-backdrop" id="statusModal">
   <div class="app-modal status-modal" role="dialog" aria-modal="true">
-    <div class="app-modal-name" id="statusModalTitle"></div>
+    <div class="card-head">
+      <div class="app-modal-name" id="statusModalTitle"></div>
+    </div>
     <div class="app-modal-desc" id="statusModalText"></div>
     <button class="app-modal-close" id="statusModalClose">понятно</button>
   </div>

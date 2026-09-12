@@ -35,6 +35,7 @@
     radial-gradient(64rem 40rem at 50% -8%, rgba(255, 255, 255, .09), transparent 66%);
 
   --radius: 18px;
+  --head-h: 5.8rem;  /* wordmark block incl. the gap under it */
   --wrap:   26rem;  /* the single column width — phone-sized on every screen */
   --shadow: 0 1px 1px rgba(0, 0, 0, .5), 0 18px 48px -28px rgba(0, 0, 0, .9);
   --ease:   cubic-bezier(.32, .72, 0, 1);
@@ -133,25 +134,50 @@ body::before {
 
 /* ── CONTENT SHELL ────────────────────────────────────────────────────────
    Top padding clears the floating pill (which is fixed, so it is out of flow);
-   the block then centers in what is left. The bottom padding is the larger of
-   the two on purpose: it biases the stack upward, so the wordmark's two lines
-   occupy the gap under the pill instead of pushing the cards down. Centering
-   splits any height change in half, so the 5.75rem swing between the two
-   paddings moves the block up by half that — the ~46px the header added. */
+   the block then centers in what is left. Only the DIFFERENCE between the two
+   paddings matters: it shifts the block by half of that difference, which is
+   how the first card is held at ~278px from the top.
+
+   Careful: both panels share one grid cell, so the cell is as tall as the
+   TALLER of them — currently the info card, not the app stack. Change the
+   info card's height (a paragraph, the header, a contact row) and the apps
+   tab moves too; re-tune the bottom padding here if it does. */
 
 .app-content {
   position: relative;
   z-index: 1;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 5.5rem 1.25rem 6.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 5.5rem 1.25rem .35rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  align-items: stretch;   /* shell.css sets center here; both panels must fill
+                             the cell, or the shorter one re-centres and the
+                             info card stops lining up with card #1 */
 }
 
-.tab-panel { display: none; width: 100%; }
-.tab-panel.active { display: block; }
+/* Both panels occupy the SAME grid cell and stay in flow (hidden with
+   visibility, not display). The cell is therefore as tall as the taller panel
+   on both tabs, so switching tabs never shifts the page vertically — and since
+   grid items align to the cell's top, #panel-info's --head-h offset lands its
+   card on exactly the same line as the first app card. */
+.tab-panel {
+  grid-area: 1 / 1;
+  width: 100%;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tab-panel.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* offset the info text by the header's height so it starts level with card #1 */
+#panel-info { padding-top: var(--head-h); }
 
 /* ── APP LIST ─────────────────────────────────────────────────────────────
    Four free-standing cards with gaps, not one panel split by hairlines. */
@@ -169,7 +195,7 @@ body::before {
    names and to the login screen's MENU logo; the nav pill stays sans. */
 
 .apps-head {
-  margin-bottom: 2.25rem;
+  height: var(--head-h);   /* fixed: #panel-info offsets by the same variable */
   text-align: center;
 }
 
@@ -219,7 +245,9 @@ body::before {
 /* a card app.js could not reach dims; clicking it raises the status popup */
 .app-card.blocked .app-icon,
 .app-card.blocked .app-name { opacity: .45; }
-.app-card.blocked .app-open { cursor: not-allowed; }
+/* re-enable together with PRE_REDIRECT_CHECK in app.js — while the gate is
+   off a blocked card still opens, so this cursor would be misleading:
+.app-card.blocked .app-open { cursor: not-allowed; } */
 
 /* ── icon tile ────────────────────────────────────────────────────────── */
 
@@ -257,6 +285,97 @@ body::before {
   object-fit: cover;
 }
 
+/* ── status dot ────────────────────────────────────────────────────────
+   Driven entirely by the classes app.js already puts on .app-card
+   (checking / online / partial / offline). It sits just left of the info
+   section, so the card reads: icon — name — state — info. */
+
+.app-card .dot {
+  flex: none;
+  width: .5rem;
+  height: .5rem;
+  margin-right: .95rem;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.app-card.checking .dot { animation: dot-pulse 1.1s ease-in-out infinite; }
+.app-card.online   .dot { background: var(--ok);   box-shadow: 0 0 .5rem color-mix(in srgb, var(--ok)   65%, transparent); }
+.app-card.partial  .dot { background: var(--warn); box-shadow: 0 0 .5rem color-mix(in srgb, var(--warn) 65%, transparent); }
+.app-card.offline  .dot { background: var(--bad);  box-shadow: 0 0 .5rem color-mix(in srgb, var(--bad)  65%, transparent); }
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: .3; }
+  50%      { opacity: 1; }
+}
+
+/* Hidden for now — delete this one rule to bring the indicators back. The
+   markup and every state class above stay put, and app.js keeps probing
+   /status on load. Card height is fixed, so nothing shifts vertically. */
+.app-card .dot { display: none; }
+
+/* ── info section ──────────────────────────────────────────────────────
+   A full-height strip down the card's right edge, split off by one hairline
+   (per card.png). Negative margins let it bleed through .app-card's padding
+   to the very edge; the card's overflow:hidden clips it to the corner radius.
+   z-index puts it above .app-open, so a tap here opens the popup instead of
+   the app. */
+
+.app-info-btn {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  align-self: stretch;
+  width: 3.9rem;
+  margin: -1.1rem -1.35rem -1.1rem 0;
+  display: grid;
+  place-items: center;
+  background: var(--border-active);   /* the old divider colour, now the fill —
+                                         the strip's own edge is the divider */
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1;
+  transition: background .18s ease, color .18s ease;
+}
+
+.app-info-btn:hover {
+  background: color-mix(in srgb, var(--border-active) 86%, var(--neon));
+  color: var(--accent);
+}
+
+/* ── refresh ───────────────────────────────────────────────────────────
+   Circle with the two-arrow glyph, centred under the stack. app.js toggles
+   .spinning on it for the duration of a check. */
+
+.app-refresh {
+  margin: 1.4rem auto 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text);
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.app-refresh:hover { background: var(--sunk); border-color: var(--border-active); color: var(--accent); }
+
+.app-refresh svg { width: 1.15rem; height: 1.15rem; }
+
+.app-refresh.spinning { color: var(--text-dim); pointer-events: none; }
+.app-refresh.spinning svg { animation: spin .8s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Hidden for now — delete this one rule to bring the button back. The markup,
+   the app.js listener and the .spinning styles above all stay put; statuses
+   still refresh on page load via checkStatus(). */
+.app-refresh { display: none; }
+
 /* ── name ─────────────────────────────────────────────────────────────── */
 
 .app-name {
@@ -271,6 +390,27 @@ body::before {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── CARD HEADER ──────────────────────────────────────────────────────────
+   One entry point, used by the popup and the info card alike: a mark, a title
+   and a hairline that closes the header off from the body. Before this the
+   info card began mid-sentence and the popup's lead ran straight into its
+   list, so neither had anywhere for the eye to land first. */
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding-bottom: .85rem;
+  border-bottom: 1px solid var(--border-active);
+}
+
+.card-head-mark {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: .45rem;   /* matches the tiles' own rx at this size */
 }
 
 /* ── INFO TAB ─────────────────────────────────────────────────────────── */
@@ -291,6 +431,15 @@ body::before {
   line-height: 1.65;
 }
 
+.info-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--accent);
+}
+
 .info-card strong { color: var(--accent); font-weight: 600; }
 .info-card .info-foot { color: var(--text-dim); font-size: .85rem; }
 
@@ -308,21 +457,40 @@ body::before {
   gap: .7rem;
 }
 
+/* Left-aligned, not centred: the paragraphs above establish a left reading
+   edge and centred pills broke it. The trailing glyph also tells the two
+   apart — one copies to the clipboard, the other opens a new tab, and until
+   now they looked identical. */
 .info-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
   width: 100%;
-  padding: .85rem 1.1rem;
+  padding: .8rem 1rem;
   background: var(--sunk);
   border: 1px solid var(--border);
   border-radius: .75rem;
   color: var(--text);
   font-family: var(--mono);
   font-size: .85rem;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
   cursor: pointer;
   transition: background .18s ease, border-color .18s ease, color .18s ease;
 }
+
+.info-link-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+.info-link-icon {
+  flex: none;
+  width: .9rem;
+  height: .9rem;
+  color: var(--text-dim);
+  transition: color .18s ease;
+}
+
+.info-link:hover .info-link-icon { color: var(--accent); }
 
 .info-link:hover { background: var(--accent-bg); border-color: var(--border-active); color: var(--accent); }
 
@@ -403,6 +571,7 @@ body::before {
 .app-modal-backdrop.open { display: flex; }
 
 .app-modal {
+  position: relative;
   width: 100%;
   max-width: var(--wrap);
   padding: 1.6rem 1.5rem;
@@ -417,8 +586,8 @@ body::before {
   -webkit-backdrop-filter: none;
 }
 
-.app-modal-name { color: var(--accent); font-size: 1.05rem; font-weight: 600; letter-spacing: -.02em; }
-.app-modal-desc { color: var(--text); font-size: .9rem; line-height: 1.6; }
+.app-modal-name { min-width: 0; padding-right: 2.2rem; color: var(--accent); font-family: var(--mono); font-size: 1.05rem; font-weight: 500; letter-spacing: -.02em; }
+.app-modal-desc { color: var(--read); font-size: .95rem; line-height: 1.6; }
 
 .app-modal-features {
   list-style: none;
@@ -433,7 +602,7 @@ body::before {
   position: relative;
   padding-left: 1.25rem;
   color: var(--text);
-  font-size: .88rem;
+  font-size: .86rem;
   line-height: 1.55;
 }
 
@@ -445,8 +614,31 @@ body::before {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ok);
+  background: var(--accent);
 }
+
+.app-modal-x {
+  position: absolute;
+  top: .7rem;
+  right: .7rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  background: var(--sunk);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-dim);
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.app-modal-x svg {
+  display: block;      /* no baseline gap — the glyph version sat high */
+  width: .72rem;
+  height: .72rem;
+}
+
+.app-modal-x:hover { background: var(--accent-bg); border-color: var(--border-active); color: var(--accent); }
 
 .app-modal-close {
   align-self: flex-end;
