@@ -4,11 +4,13 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -42,7 +44,7 @@ type appDef struct {
 	Slug string // url segment + status key, e.g. "blur"
 	Name string // display name shown on the card
 	URL  string // target base URL, e.g. "https://blur.sh-development.ru"
-	Icon string // icon filename under web/app_icons/ (e.g. "blur.png"); empty → first-letter tile
+	Icon string // icon filename under web/icons/ (e.g. "blur.svg"); empty → first-letter tile
 	Desc string // short description shown at the top of the info modal
 
 	// Features is an optional bullet list shown under Desc in the info modal.
@@ -52,7 +54,7 @@ type appDef struct {
 
 var apps = []appDef{
 	{
-		Slug: "nom-nom", Name: "nom nom", URL: "https://nom-nom.sh-development.ru", Icon: "nom-nom.svg",
+		Slug: "nom-nom", Name: "nom-nom", URL: "https://nom-nom.sh-development.ru", Icon: "nom-nom.svg",
 		Desc: "Это трекер для колорий и веса",
 		Features: []string{
 			"Ежедневная статистика прогресса",
@@ -61,12 +63,21 @@ var apps = []appDef{
 		},
 	},
 	{
-		Slug: "wgetbash", Name: "wgetbash", URL: "https://wgetbash.sh-development.ru", Icon: "wgetbash.svg",
+		Slug: "wgetbash", Name: "wget-bash", URL: "https://wgetbash.sh-development.ru", Icon: "wget-bash.svg",
 		Desc: "Хранилище для bash скриптов",
 		Features: []string{
 			"Доставка до сервера в один клик",
 			"Группы и быстрый поиск по скриптам",
 			"Встроенный просмотр логов",
+		},
+	},
+	{
+		Slug: "blur", Name: "blur", URL: "https://blur.sh-development.ru", Icon: "blur.svg",
+		Desc: "Плеер для длинных аудио — книг, подкастов и лекций",
+		Features: []string{
+			"Удобно выбирать время воспроизведения клавиатурой",
+			"Плеер запоминает где вы остановились, даже если приложение закрыто",
+			"Можно отключить автовоспроизведение, чтоб плеер сам остановился",
 		},
 	},
 	{
@@ -78,19 +89,39 @@ var apps = []appDef{
 			"Это бесплатно!",
 		},
 	},
-	{
-		Slug: "blur", Name: "blur", URL: "https://blur.sh-development.ru", Icon: "blur.png",
-		Desc: "Плеер для длинных аудио — книг, подкастов и лекций",
-		Features: []string{
-			"Удобно выбирать время воспроизведения клавиатурой",
-			"Плеер запоминает где вы остановились, даже если приложение закрыто",
-			"Можно отключить автовоспроизведение, чтоб плеер сам остановился",
-		},
-	},
+}
+
+// assetVer is a short content hash of everything embedded under web/. The
+// template appends it to static URLs as ?v=…, so a rebuilt binary serves new
+// URLs and the long cacheStatic TTL below can never pin a stale asset. Without
+// it, replacing an icon stayed invisible for up to 30 days to anyone who had
+// already loaded the page.
+var assetVer = "0"
+
+func initAssetVer() {
+	h := fnv.New64a()
+	err := fs.WalkDir(webFiles, "web", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		b, err := webFiles.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		h.Write([]byte(path)) //nolint:errcheck
+		h.Write(b)            //nolint:errcheck
+		return nil
+	})
+	if err != nil {
+		log.Printf("asset-version error=%v", err)
+		return
+	}
+	assetVer = strconv.FormatUint(h.Sum64(), 36)
 }
 
 // cacheStatic wraps a handler with a long-lived cache header. Use for media that
 // only changes on deploy (background, icons, favicon) so browsers don't re-fetch it.
+// Safe because every URL it serves carries ?v=assetVer.
 func cacheStatic(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "public, max-age=2592000") // 30 days
@@ -131,6 +162,7 @@ func initTemplate() {
 	}
 	tmpl = template.Must(template.New("index").Funcs(template.FuncMap{
 		"join": strings.Join,
+		"ver":  func() string { return assetVer },
 	}).Parse(string(src)))
 }
 
@@ -253,6 +285,7 @@ func main() {
 	jwtSecret = []byte(secretKey)
 
 	initDB()
+	initAssetVer()
 	initTemplate()
 
 	webFS, _ := fs.Sub(webFiles, "web")
@@ -266,7 +299,7 @@ func main() {
 	mux.HandleFunc("GET /status", handleStatus)
 	mux.Handle("GET /favicon.svg", cacheStatic(fileServer))
 	mux.Handle("GET /background.webp", cacheStatic(fileServer))
-	mux.Handle("GET /app_icons/{file}", cacheStatic(fileServer))
+	mux.Handle("GET /icons/{file}", cacheStatic(fileServer))
 	mux.Handle("GET /shell.css", fileServer)
 	mux.Handle("GET /shell.js", fileServer)
 	mux.Handle("GET /app.css", fileServer)

@@ -1,0 +1,19 @@
+# Air watches only go/tpl/tmpl/html by default, but every asset under web/ is
+# compiled into the binary by //go:embed — so editing CSS, JS or an icon needs
+# a rebuild to reach the browser. Without this config those edits looked like
+# no-ops. Image extensions are listed too: renaming or replacing an icon under
+# web/icons must retrigger the build, or the binary keeps the old bytes.
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "./tmp/main"
+  include_ext = ["go", "html", "css", "js", "svg", "png", "webp"]
+  exclude_dir = ["tmp"]
+  exclude_regex = ["_test\\.go$"]
+  delay = 200
+  stop_on_error = true
+
+[misc]
+  clean_on_exit = false

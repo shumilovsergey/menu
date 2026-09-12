@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="blur">
+  <defs>
+    <clipPath id="b-tile"><rect width="64" height="64" rx="16"/></clipPath>
+    <clipPath id="b-stone">
+      <path d="M 54.17 41.18 L 41.18 54.17 L 22.82 54.17 L 9.83 41.18 L 9.83 22.82 L 22.82 9.83 L 41.18 9.83 L 54.17 22.82 Z"/>
+    </clipPath>
+
+    <linearGradient id="b-plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1733"/>
+      <stop offset="1" stop-color="#100e1b"/>
+    </linearGradient>
+    <linearGradient id="b-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#efa0e2"/>
+      <stop offset=".44" stop-color="#b481d0"/>
+      <stop offset="1"   stop-color="#5f3878"/>
+    </linearGradient>
+    <radialGradient id="b-peri" cx=".1" cy=".95" r=".8">
+      <stop offset="0" stop-color="#7a72c0" stop-opacity="1"/>
+      <stop offset="1" stop-color="#7a72c0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b-glow" cx=".08" cy=".04" r=".62">
+      <stop offset="0" stop-color="#ffb3f0" stop-opacity="1"/>
+      <stop offset="1" stop-color="#ffb3f0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="b-sheen" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0"  stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#ffffff" stop-opacity=".13"/>
+      <stop offset="1"  stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="b-soft" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="b-grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#b-tile)">
+    <rect width="64" height="64" fill="url(#b-plate)"/>
+
+    <g clip-path="url(#b-stone)">
+      <rect width="64" height="64" fill="url(#b-wash)"/>
+      <rect width="64" height="64" fill="url(#b-peri)"/>
+      <rect width="64" height="64" fill="url(#b-glow)"/>
+      <ellipse cx="32" cy="32" rx="46" ry="8" transform="rotate(-45 32 32)"
+               fill="url(#b-sheen)" filter="url(#b-soft)"/>
+    </g>
+    <rect width="64" height="64" filter="url(#b-grain)" opacity=".07"
+          style="mix-blend-mode:overlay"/>
+
+    <g fill="none" stroke="#160f20" stroke-linejoin="round" stroke-linecap="round">
+      <g stroke-width="1.7">
+        <path d="M 44.56 37.2 L 37.2 44.56 L 26.8 44.56 L 19.44 37.2 L 19.44 26.8 L 26.8 19.44 L 37.2 19.44 L 44.56 26.8 Z"/>
+        <path d="M 54.17 41.18 L 44.56 37.2 M 41.18 54.17 L 37.2 44.56 M 22.82 54.17 L 26.8 44.56 M 9.83 41.18 L 19.44 37.2 M 9.83 22.82 L 19.44 26.8 M 22.82 9.83 L 26.8 19.44 M 41.18 9.83 L 37.2 19.44 M 54.17 22.82 L 44.56 26.8"/>
+      </g>
+      <path stroke-width="1" d="M 23.00 29.77 L 31.77 21.00 M 25.69 30.48 L 32.48 23.69 M 28.38 30.90 L 32.90 26.38"/>
+    </g>
+  </g>
+
+  <rect x=".69" y=".69" width="62.62" height="62.62" rx="15.31"
+        fill="none" stroke="#ffffff" stroke-opacity=".34" stroke-width="1.38"/>
+</svg>

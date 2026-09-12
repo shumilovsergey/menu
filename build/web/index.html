@@ -4,16 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>menu</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="preload" href="/background.webp" as="image" fetchpriority="high" />
+  <link rel="icon" href="/favicon.svg?v={{ver}}" type="image/svg+xml" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="menu" />
-  <link rel="stylesheet" href="/shell.css" />
-  <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/shell.css?v={{ver}}" />
+  <link rel="stylesheet" href="/app.css?v={{ver}}" />
 </head>
 <body>
-<div id="bg"></div>
-
 {{if .Error}}
 <div class="error-banner">{{.Error}}</div>
 {{end}}
@@ -25,40 +22,24 @@
     <button class="tab active" data-tab="apps">apps</button>
     <button class="tab" data-tab="info">info</button>
   </div>
-  <div class="profile-area">
-    <button class="profile-btn" id="profileBtn"
-            data-name="{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}">
-      <span class="profile-initial">?</span>
-    </button>
-    <div class="profile-popover" id="profilePopover">
-      <div class="pi-info">
-        <span class="pi-label">{{.User.Method}}</span>
-        <span class="pi-name">{{if .User.Name}}{{.User.Name}}{{else}}{{.User.AuthID}}{{end}}</span>
-        {{if .User.Name}}<span class="pi-sub">{{.User.AuthID}}</span>{{end}}
-      </div>
-      <div class="pi-list">
-        <a class="pi-action pi-readme" href="https://github.com/shumilovsergey/menu" target="_blank" rel="noopener">readme</a>
-        <a class="pi-action pi-logout" href="/logout">log out</a>
-      </div>
-    </div>
-  </div>
 </nav>
 
 <main class="app-content">
   <div class="tab-panel active" id="panel-apps">
     <div class="apps-wrap">
+      <header class="apps-head">
+        <h1 class="apps-title">sh-development</h1>
+        <p class="apps-sub">приложения</p>
+      </header>
       <div class="app-grid">
         {{range .Apps}}
         <div class="app-card checking" data-slug="{{.Slug}}" data-url="{{.URL}}">
-          <div class="app-icon">{{if .Icon}}<img src="/app_icons/{{.Icon}}" alt="">{{else}}{{slice .Name 0 1}}{{end}}</div>
-          <i class="dot" aria-hidden="true"></i>
+          <div class="app-icon">{{if .Icon}}<img src="/icons/{{.Icon}}?v={{ver}}" alt="">{{else}}{{slice .Name 0 1}}{{end}}</div>
           <span class="app-name">{{.Name}}</span>
-          <button class="app-info-btn" data-name="{{.Name}}" data-desc="{{.Desc}}" data-features="{{join .Features "|"}}" aria-label="инфо о {{.Name}}">i</button>
           <a class="app-open" href="/open/{{.Slug}}" aria-label="открыть {{.Name}}"></a>
         </div>
         {{end}}
       </div>
-      <button class="app-refresh" id="appRefresh" aria-label="обновить статус" title="обновить статус">↻</button>
     </div>
   </div>
   <div class="tab-panel" id="panel-info">
@@ -117,7 +98,7 @@
 
 <div class="app-toast" id="toast"></div>
 
-<script src="/shell.js"></script>
-<script src="/app.js"></script>
+<script src="/shell.js?v={{ver}}"></script>
+<script src="/app.js?v={{ver}}"></script>
 </body>
 </html>
