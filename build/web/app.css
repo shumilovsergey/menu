@@ -36,6 +36,13 @@
 
   --radius: 18px;
   --head-h: 5.8rem;  /* wordmark block incl. the gap under it */
+
+  /* The profile circle's diameter must equal the tab pill's height, so the
+     pill's height is stated rather than left to the tab's line box. Change
+     --tab-h or --nav-pad and the circle follows. */
+  --tab-h:   2.6rem;
+  --nav-pad: .4rem;
+  --nav-h:   calc(var(--tab-h) + 2 * var(--nav-pad) + 2px);  /* +2px: borders */
   --wrap:   26rem;  /* the single column width — phone-sized on every screen */
   --shadow: 0 1px 1px rgba(0, 0, 0, .5), 0 18px 48px -28px rgba(0, 0, 0, .9);
   --ease:   cubic-bezier(.32, .72, 0, 1);
@@ -85,8 +92,10 @@ body::before {
 
 /* ── NAVBAR ───────────────────────────────────────────────────────────────
    shell.css lays the bar out as a space-between row (tabs left, profile
-   right). The profile circle is gone, so the bar becomes a floating pill
-   centered at the top, v4-style. */
+   right). Here the pill and the profile circle instead travel together as one
+   centered group at the top, v4-style — two separate floating capsules with a
+   gap between them, so the circle reads as its own control rather than a
+   button glued onto the bar. */
 
 .navbar {
   position: fixed;
@@ -95,13 +104,15 @@ body::before {
   z-index: 20;
   transform: translateX(-50%);
   justify-content: center;
+  align-items: center;
+  gap: .55rem;
   max-width: calc(100% - 1.5rem);
   padding: 0;
 }
 
 .nav-tabs {
   gap: .15rem;
-  padding: .4rem .45rem;
+  padding: var(--nav-pad) .45rem;
   background: color-mix(in srgb, var(--card) 72%, transparent);
   border: 1px solid var(--border-active);
   border-radius: 999px;
@@ -112,8 +123,11 @@ body::before {
 
 .tab {
   min-width: 0;
-  height: auto;
-  padding: .58rem 1.2rem;
+  height: var(--tab-h);
+  padding: 0 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
   font-family: var(--sans);
   font-size: .95rem;
@@ -686,20 +700,76 @@ body::before {
 
 .error-banner { z-index: 500; font-family: var(--mono); }
 
-/* ── PROFILE POPOVER ──────────────────────────────────────────────────────
-   The trigger circle is out of index.html for now; these rules are kept so
-   restoring the element brings back a popover that matches the new theme. */
+/* ── PROFILE CIRCLE + POPOVER ─────────────────────────────────────────────
+   The circle is the pill's twin: same fill, same border, same blur, same
+   shadow — only round, and exactly as tall as the pill (--nav-h). Sitting a
+   gap away from the pill, it reads as a second capsule rather than a tab. */
 
-.profile-popover {
-  background: var(--card);
-  border-color: var(--border-active);
-  border-radius: 14px;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+.profile-area { flex: none; }
+
+.profile-btn {
+  width:  var(--nav-h);
+  height: var(--nav-h);
+  background: color-mix(in srgb, var(--card) 72%, transparent);
+  border: 1px solid var(--border-active);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  text-shadow: none;
+  transition: background .25s var(--ease), color .25s var(--ease),
+              border-color .25s var(--ease), transform .2s var(--ease);
 }
 
-.pi-name { color: var(--accent); }
+/* shell.css pairs :hover with .open in one rule and puts a near-white border
+   on both, so every state below has to restate border-color to win. */
+.profile-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--accent-bg);
+}
+
+.profile-btn:active { transform: scale(.94); }
+
+.profile-btn.open {
+  color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--accent-bg);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--accent-line);
+}
+
+.profile-popover {
+  top: calc(100% + .55rem);
+  width: 15rem;
+  padding: .5rem;
+  gap: .5rem;
+  background: var(--card);
+  border-color: var(--border-active);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform-origin: top right;
+}
+
+/* shell.js swaps display none/flex, so the reveal is an animation on the
+   .open state rather than a transition. */
+.profile-popover.open { animation: pi-pop .22s var(--ease) both; }
+
+@keyframes pi-pop {
+  from { opacity: 0; transform: translateY(-.4rem) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pi-info { padding: .4rem .6rem .15rem; gap: .15rem; }
+.pi-name { color: var(--accent); font-size: .95rem; }
 .pi-label, .pi-sub { color: var(--text-dim); }
+.pi-label { font-size: .68rem; }
+.pi-sub { font-size: .75rem; }
 
 .pi-list {
   display: flex;
