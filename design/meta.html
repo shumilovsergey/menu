@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>sh — link preview banner</title>
+<style>
+/* Same family as avatar.html: same ground, same glow recipe, same typeface.
+   Only the proportions change — Telegram/OG previews are 1.91:1, so the
+   square artboard's glow would be cropped to a sliver. */
+:root {
+  --bg:     #000000;
+  --accent: #f5f5f7;
+  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Inter, Roboto, Arial, sans-serif;
+
+  /* Identical to avatar.html — they are in em, so they hold at this size too. */
+  --nudge-y: .0929em;
+  --nudge-x: .026em;
+}
+
+* { box-sizing: border-box; }
+html { background: #17171a; }
+body { margin: 0; font-family: var(--sans); color: #a1a1a6; }
+
+/* ── the artboard ────────────────────────────────────────────────────────
+   Exactly 1200×630 (the OG/Telegram standard) at the very top-left, so a
+   1200×630 viewport screenshot is the finished asset. */
+.banner {
+  width: 1200px;
+  height: 630px;
+  display: grid;
+  place-items: center;
+  /* Three stacked ellipses, same alphas and vertical proportions as the
+     avatar — peak ~54/255 at the top edge, fading out around y≈600. The
+     horizontal radii are widened for the 1.91:1 frame so the light spans the
+     full top edge instead of reading as a small spotlight in the middle. */
+  background:
+    radial-gradient(54% 62% at 50% -3%,   rgba(255, 255, 255, .125), transparent 72%),
+    radial-gradient(82% 98% at 50% -12%,  rgba(255, 255, 255, .085), transparent 74%),
+    radial-gradient(120% 150% at 50% -20%, rgba(255, 255, 255, .048), transparent 80%),
+    var(--bg);
+  overflow: hidden;
+}
+
+.mark {
+  transform: translate(var(--nudge-x), var(--nudge-y));
+  font-family: var(--mono);
+  font-size: 305px;          /* 1.22× the avatar's 250px — ink ≈ 335×231 */
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent);
+  user-select: none;
+}
+
+/* ── below the fold: judging it at real preview size ─────────────────────── */
+.sheet { padding: 40px; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+.note  { width: 100%; max-width: 620px; font-size: 14px; line-height: 1.6; }
+.note h1 { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: var(--accent); }
+.note code { font-family: var(--mono); color: var(--accent); }
+
+.shot { display: flex; flex-direction: column; gap: 10px; }
+.shot span { font-size: 12px; color: #6e6e73; }
+.clip { overflow: hidden; border-radius: 6px; }
+.w368 { width: 368px; height: 193px; }              /* what Telegram draws */
+.w368 .banner { transform: scale(.3067); transform-origin: top left; }
+</style>
+</head>
+<body>
+
+<!-- EXPORT TARGET: screenshot a 1200×630 viewport and you get exactly this -->
+<div class="banner"><div class="mark">Sh</div></div>
+
+<div class="sheet">
+  <div class="note">
+    <h1>link preview banner — 1200×630</h1>
+    Для <code>og:image</code>. Telegram рисует превью в ~1.84:1, так что
+    1200×630 влезает целиком — свечение больше не срезается.
+    Экспорт: снять вьюпорт <code>1200×630</code> — артборд в левом верхнем углу,
+    остальное на странице ниже сгиба.
+  </div>
+
+  <div class="shot">
+    <div class="clip w368"><div class="banner"><div class="mark">Sh</div></div></div>
+    <span>реальный размер превью в Telegram · 368×193</span>
+  </div>
+</div>
+
+</body>
+</html>

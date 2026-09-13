@@ -39,9 +39,15 @@ body { margin: 0; font-family: var(--sans); color: #a1a1a6; }
   height: 512px;
   display: grid;
   place-items: center;
+  /* Three stacked ellipses instead of two. Telegram crops to a circle, which
+     eats the top corners, so a glow that died by y≈200 read as a small bright
+     cap. Same peak brightness at the top edge (~54/255), but the falloff now
+     runs past the letters and out to y≈380, and the wider horizontal radii
+     keep light on the upper-left/right arc of the crop. */
   background:
-    radial-gradient(58% 42% at 50% -4%,  rgba(255, 255, 255, .17), transparent 70%),
-    radial-gradient(115% 75% at 50% -14%, rgba(255, 255, 255, .10), transparent 66%),
+    radial-gradient(72% 54% at 50% -2%,   rgba(255, 255, 255, .125), transparent 72%),
+    radial-gradient(115% 86% at 50% -10%, rgba(255, 255, 255, .085), transparent 74%),
+    radial-gradient(170% 130% at 50% -18%, rgba(255, 255, 255, .048), transparent 80%),
     var(--bg);
   overflow: hidden;
 }
